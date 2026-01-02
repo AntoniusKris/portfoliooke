@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Garxvoid — Dark Art Portfolio</title>
+<title>Garxvoid – Dark Art Portfolio</title>
 
 <style>
 :root{
@@ -45,6 +45,13 @@ html,body{
   color:var(--muted);
   max-width:520px;
   line-height:1.6;
+}
+
+/* ---------- LOADING ---------- */
+.loading{
+  text-align:center;
+  padding:4rem;
+  color:var(--muted);
 }
 
 /* ---------- GALLERY ---------- */
@@ -140,13 +147,15 @@ footer{
     <h1>GARXVOID</h1>
     <h2>Kristiyanto</h2>
     <p>
-      Visual digital artist — black & white illustration — dark art.
+      Visual digital artist – black & white illustration – dark art.
       Exploring contrast, void, and form through brutalist composition.
     </p>
   </div>
 </section>
 
-<section class="gallery" id="gallery"></section>
+<section class="gallery" id="gallery">
+  <div class="loading">Loading gallery...</div>
+</section>
 
 <section class="about">
   <h3>About</h3>
@@ -165,122 +174,127 @@ footer{
   <img id="lightbox-img" alt="">
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
 <script>
+/* ---------- CONFIGURATION ---------- */
+// Replace with your Google Sheet URL (published as CSV)
+// Instructions:
+// 1. Open your Google Sheet
+// 2. Go to File > Share > Publish to web
+// 3. Choose the specific sheet and "Comma-separated values (.csv)"
+// 4. Copy the published URL and paste it below
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmOvW2kAby4xP04VIDMpE9xfQLtPVxeJrGSfxmrXgHkiapV3gHBS7qh1_laPbW88XWSOtQbgIddkJL/pub?gid=143743589&single=true&output=csv';
+
+// Column index (0-based) where the image IDs are stored
+// Example: If IDs are in column A, use 0. Column B = 1, Column C = 2, etc.
+const ID_COLUMN_INDEX = 0;
+
 /* ---------- GOOGLE DRIVE IMAGE CDN ---------- */
 const DRIVE_IMG = id =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w2000`;
 
-/* ---------- FILE IDS ---------- */
-const images = [
-"1WrHiCnU42ak3G1UJuHkUJo71FV4MVmvd",
-"19SS1fvOrCd2y8adXEAcJkfM8t2xNTpiT",
-"1ne_V-Cba0s7D8LV1rOjDe76cDe5k9AxR",
-"1onRMu5QOpx4XcLjRT3AG40YoH6uUhdjp",
-"1mU2LOGMCIHcJhmD3E1X9ZQ1To_IYTXap",
-"1z1WXBc6oDuaAjTWk1otKxhYWyQtqadwt",
-"1pFDOREirSz1A2OSUKQlSKYo_GC5k_-ay",
-"1wmgR8c7QTjYSPkjjGGf6K8AHePCRCDlX",
-"1Sip_fBgUYI7pkXswt2P6autW5yPtZc1G",
-"11sRZT9Vckd9az8qcYYuq6wWLxJ80kIaH",
-"1uk0fsixoXNFJePusGvyhcPAsuIzBl14i",
-"1LBtEJRDavptT1mifc9aUD_Y8kmEtLLge",
-"1phKas9Igg0JgVThEVCU0Jq7Dvz_6D4Jb",
-"1Wyivv1KGC3CZpKTD9EB6mBP6F3XbgRMQ",
-"1N9IXnjRJj3x-8Kg8B61BX62QvlzzQ-h4",
-"1zrXxkYZ5egDZAu9-akUBO7UKiXM9Xa3s",
-"1x-fhjGGl0vgIEN-KWM-3DXSL_ScbRpZF",
-"1zMl585flZC9YyaY5hLZAdXxrqO1j1-5T",
-"1SymQQbWMUpE-H3q_YwUeW8kPE2A5MFtH",
-"1y4Ep5NVsgoTqoqx5hdKk9EJ1LgFS6Y6B",
-"1T0QvpCEXRPMgh47R2EIncawE4-dvPTjl",
-"1hI4UiEiqYt3zmNM_LRozQSeaTTgYxIBg",
-"1T5kr1PqJcK9TQPsrcO_zaCrmWWjtWfpU",
-"1ouO3xf3DlgoS4_wrbsLJe-D0kvuY42xt",
-"1BTTHfRvhxHtibTpUyjIqvq9Ncu2ONMIF",
-"1uPymbRq6MyvJaGLVL6zb-_6vwVXYP6Du",
-"1D7BjygDYWAQJZ_-t0cAZSLhLXo7lm9Ly",
-"1dblX703FWy1raWjpI52LADFP8r4pfsJ9",
-"176ESyIWa-FIj0qUEsj8oAGOuf8NGJKoE",
-"1VITgpB3z-THSKxR0b4P18N8p3FqRn2Pj",
-"1z0OOXU1dOf-oZo1NT_rvDVnoOD5wgz5i",
-"1xF4lX2ssNbXF5t6dm7Kg-eNeZa0rrWwD",
-"1sCB16_d3qZ2n7Tq2jD20brb3rQamkoEj",
-"15xkU6P6CNb5TGoYEgYA3Cb9Us57bpmob",
-"1Tm1pwjEJTwe8ieWV1q275saDUrQl-gKC",
-"1-nQ7DOCYWK8v2ms71nfk8ohDVx5JxbIO",
-"1bvrZRBeeAjYNctNSDoDOPBkx0rhGHV16",
-"15QyrmbGVz4XA8rumexFLOqAtBNdAGSqK",
-"1rvp-WsiKlBZLORWj0cH8Htx1p_EdmzMj",
-"1EPXvzULcnq7ZtjdiA415KnWd5JWt9MD0",
-"1elDhKzMIcB8BVOT41SkwoWO7-jvbvI5O",
-"1O8YhYmoDa2EdQnNIJbPZpjG1SRmGNTl7",
-"1A4v_7fzK5Vl3CWApw1z7IJha65_a2hpu",
-"1MBnBaGz-wkCS9pSbMIJBzZ4J8Z2RtsbB",
-"1CDLMJr08LU5c-G5u_GU6o7NBpN6iFlmo",
-"14mUcZQA_dzdIEQW42-dg30erwjoURYHR",
-"1kVmMuxapdWAb5NvmSlmt524Ey2bF9yaJ",
-"1ezJ0ORZKmddwlNpje5PdrVMHf5AVANYT"
-];
-
-/* ---------- BUILD GALLERY ---------- */
+/* ---------- FETCH AND BUILD GALLERY ---------- */
 const gallery = document.getElementById("gallery");
 
-images.forEach(id=>{
-  const wrap = document.createElement("div");
-  wrap.className = "work";
+async function loadGallery() {
+  try {
+    const response = await fetch(SHEET_CSV_URL);
+    const csvText = await response.text();
+    
+    Papa.parse(csvText, {
+      complete: function(results) {
+        // Remove loading message
+        gallery.innerHTML = '';
+        
+        // Extract image IDs from specified column
+        const images = results.data
+          .map(row => row[ID_COLUMN_INDEX])
+          .filter(id => id && id.trim() !== ''); // Remove empty rows
+        
+        if (images.length === 0) {
+          gallery.innerHTML = '<div class="loading">No images found in sheet</div>';
+          return;
+        }
+        
+        // Build gallery
+        images.forEach(id => {
+          const wrap = document.createElement("div");
+          wrap.className = "work";
 
-  const img = document.createElement("img");
-  img.src = DRIVE_IMG(id);
-  img.loading = "lazy";
-  img.decoding = "async";
-  img.alt = "Garxvoid artwork";
+          const img = document.createElement("img");
+          img.src = DRIVE_IMG(id.trim());
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.alt = "Garxvoid artwork";
 
-  wrap.appendChild(img);
-  gallery.appendChild(wrap);
-});
-
-/* ---------- FADE IN ---------- */
-const works = document.querySelectorAll(".work");
-
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.classList.add("visible");
-      observer.unobserve(entry.target);
-    }
-  });
-},{threshold:.15});
-
-works.forEach(w=>observer.observe(w));
-
-/* ---------- SCROLL DRIFT ---------- */
-function animate(){
-  works.forEach(work=>{
-    const rect = work.getBoundingClientRect();
-    const center = rect.top + rect.height / 2;
-    const offset = (window.innerHeight / 2 - center) * 0.03;
-    work.querySelector("img").style.transform =
-      `translateY(${offset}px)`;
-  });
-  requestAnimationFrame(animate);
+          wrap.appendChild(img);
+          gallery.appendChild(wrap);
+        });
+        
+        // Initialize animations after gallery is built
+        initializeGallery();
+      },
+      error: function(error) {
+        gallery.innerHTML = '<div class="loading">Error loading gallery. Please check the CSV URL.</div>';
+        console.error('Parse error:', error);
+      }
+    });
+    
+  } catch (error) {
+    gallery.innerHTML = '<div class="loading">Error loading gallery. Please check the CSV URL.</div>';
+    console.error('Fetch error:', error);
+  }
 }
-animate();
 
-/* ---------- LIGHTBOX ---------- */
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightbox-img");
+/* ---------- INITIALIZE GALLERY ANIMATIONS ---------- */
+function initializeGallery() {
+  const works = document.querySelectorAll(".work");
+  
+  // Fade in observer
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:.15});
 
-document.querySelectorAll(".work img").forEach(img=>{
-  img.addEventListener("click", ()=>{
-    lightboxImg.src = img.src;
-    lightbox.classList.add("active");
+  works.forEach(w => observer.observe(w));
+  
+  // Scroll drift animation
+  function animate(){
+    works.forEach(work => {
+      const rect = work.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const offset = (window.innerHeight / 2 - center) * 0.03;
+      work.querySelector("img").style.transform =
+        `translateY(${offset}px)`;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+  
+  // Lightbox functionality
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightbox-img");
+
+  document.querySelectorAll(".work img").forEach(img => {
+    img.addEventListener("click", () => {
+      lightboxImg.src = img.src;
+      lightbox.classList.add("active");
+    });
   });
-});
 
-lightbox.addEventListener("click", ()=>{
-  lightbox.classList.remove("active");
-  lightboxImg.src = "";
-});
+  lightbox.addEventListener("click", () => {
+    lightbox.classList.remove("active");
+    lightboxImg.src = "";
+  });
+}
+
+// Load gallery on page load
+loadGallery();
 </script>
 
 </body>
