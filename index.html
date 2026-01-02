@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Garxvoid – Dark Art Portfolio</title>
 
+<!-- ================= META PREVIEW (TEMPLATE) ================= -->
+<meta name="description" content="Garxvoid — Dark art & black-and-white visual illustration portfolio.">
+<meta property="og:title" content="Garxvoid – Dark Art Portfolio">
+<meta property="og:description" content="Black & white illustration. Darkness, symbolism, brutalist composition.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antoniuskris.github.io/portfoliooke/">
+<meta property="og:image" content="https://yourdomain.com/preview-placeholder.jpg">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Garxvoid – Dark Art Portfolio">
+<meta name="twitter:description" content="Dark visual illustration & brutalist composition.">
+<meta name="twitter:image" content="https://yourdomain.com/preview-placeholder.jpg">
+
 <style>
 :root{
   --bg:#050505;
@@ -18,7 +31,7 @@ html,body{
   margin:0;
   background:var(--bg);
   color:var(--fg);
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family:"Helvetica Neue", Arial, sans-serif;
   overflow-x:hidden;
 }
 
@@ -29,9 +42,7 @@ html,body{
   align-items:center;
   padding:8vw;
 }
-.hero-inner{
-  max-width:900px;
-}
+.hero-inner{max-width:900px}
 .hero h1{
   font-size:clamp(3rem,8vw,6rem);
   letter-spacing:-0.04em;
@@ -47,57 +58,61 @@ html,body{
   line-height:1.6;
 }
 
-/* ---------- LOADING ---------- */
-.loading{
-  text-align:center;
-  padding:4rem;
-  color:var(--muted);
-}
-
 /* ---------- GALLERY ---------- */
 .gallery{
   padding:6vw;
-  column-count:3;
-  column-gap:2rem;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2rem;
 }
-@media(max-width:1000px){.gallery{column-count:2}}
-@media(max-width:600px){.gallery{column-count:1}}
+@media(max-width:1200px){
+  .gallery{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .gallery{grid-template-columns:1fr}
+}
 
+/* ---------- WORK CARD ---------- */
 .work{
-  margin-bottom:2rem;
-  break-inside:avoid;
-  cursor:pointer;
+  position:relative;
+  overflow:hidden;
   opacity:0;
-  transform:translateY(40px);
+  transform:
+    translateY(80px)
+    scale(0.92);
   transition:
-    opacity .9s ease,
-    transform .9s cubic-bezier(.2,.6,.2,1);
+    opacity .8s ease,
+    transform 1s cubic-bezier(.2,.6,.2,1);
+  will-change:transform,opacity;
 }
 
 .work.visible{
   opacity:1;
-  transform:none;
+  transform:
+    translateY(0)
+    scale(1);
 }
 
+.work.out{
+  opacity:0;
+  transform:
+    translateY(-60px)
+    scale(1.08);
+}
+
+/* ---------- IMAGE ---------- */
 .work img{
   width:100%;
   display:block;
   filter:grayscale(100%);
   transition:
-    filter .4s ease,
-    transform .6s cubic-bezier(.2,.6,.2,1);
+    filter .5s ease,
+    transform 1.2s cubic-bezier(.2,.6,.2,1);
   will-change:transform;
 }
 
 .work:hover img{
   filter:grayscale(0%);
-  transform:
-    translateY(-6px)
-    scale(1.035);
-}
-
-.work:hover{
-  z-index:2;
 }
 
 /* ---------- LIGHTBOX ---------- */
@@ -136,6 +151,7 @@ footer{
   padding:4rem 6vw;
   color:#555;
   font-size:.85rem;
+  text-align:center;
 }
 </style>
 </head>
@@ -144,25 +160,24 @@ footer{
 
 <section class="hero">
   <div class="hero-inner">
-    <h1>GARXVOID</h1>
+    <div class="hero-logo">
+  <img src="garxvoid.svg" alt="Garxvoid logo">
+</div>
     <h2>Kristiyanto</h2>
     <p>
-      Visual digital artist – black & white illustration – dark art.
+      Visual digital artist — black & white illustration — dark art.
       Exploring contrast, void, and form through brutalist composition.
     </p>
   </div>
 </section>
 
-<section class="gallery" id="gallery">
-  <div class="loading">Loading gallery...</div>
-</section>
+<section class="gallery" id="gallery"></section>
 
 <section class="about">
   <h3>About</h3>
   <p>
     Garxvoid is a visual digital artist working primarily in black and white.
-    The work explores darkness, symbolism, and tension through raw forms and
-    high-contrast illustration, presented with a gallery-driven minimalist approach.
+    Exploring darkness, symbolism, and tension through raw form and contrast.
   </p>
 </section>
 
@@ -177,124 +192,89 @@ footer{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
 <script>
-/* ---------- CONFIGURATION ---------- */
-// Replace with your Google Sheet URL (published as CSV)
-// Instructions:
-// 1. Open your Google Sheet
-// 2. Go to File > Share > Publish to web
-// 3. Choose the specific sheet and "Comma-separated values (.csv)"
-// 4. Copy the published URL and paste it below
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmOvW2kAby4xP04VIDMpE9xfQLtPVxeJrGSfxmrXgHkiapV3gHBS7qh1_laPbW88XWSOtQbgIddkJL/pub?gid=143743589&single=true&output=csv';
+/* ---------- CONFIG ---------- */
+const SHEET_CSV_URL =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vQmOvW2kAby4xP04VIDMpE9xfQLtPVxeJrGSfxmrXgHkiapV3gHBS7qh1_laPbW88XWSOtQbgIddkJL/pub?gid=143743589&single=true&output=csv';
 
-// Column index (0-based) where the image IDs are stored
-// Example: If IDs are in column A, use 0. Column B = 1, Column C = 2, etc.
 const ID_COLUMN_INDEX = 0;
-
-/* ---------- GOOGLE DRIVE IMAGE CDN ---------- */
 const DRIVE_IMG = id =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w2000`;
 
-/* ---------- FETCH AND BUILD GALLERY ---------- */
 const gallery = document.getElementById("gallery");
 
-async function loadGallery() {
-  try {
-    const response = await fetch(SHEET_CSV_URL);
-    const csvText = await response.text();
-    
-    Papa.parse(csvText, {
-      complete: function(results) {
-        // Remove loading message
-        gallery.innerHTML = '';
-        
-        // Extract image IDs from specified column
-        const images = results.data
-          .map(row => row[ID_COLUMN_INDEX])
-          .filter(id => id && id.trim() !== ''); // Remove empty rows
-        
-        if (images.length === 0) {
-          gallery.innerHTML = '<div class="loading">No images found in sheet</div>';
-          return;
-        }
-        
-        // Build gallery
-        images.forEach(id => {
-          const wrap = document.createElement("div");
-          wrap.className = "work";
+/* ---------- LOAD GALLERY ---------- */
+fetch(SHEET_CSV_URL)
+  .then(r => r.text())
+  .then(csv => {
+    Papa.parse(csv,{
+      complete: res => {
+        const ids = res.data
+          .map(r => r[ID_COLUMN_INDEX])
+          .filter(Boolean);
+
+        ids.forEach(id=>{
+          const w = document.createElement("div");
+          w.className="work";
 
           const img = document.createElement("img");
           img.src = DRIVE_IMG(id.trim());
-          img.loading = "lazy";
-          img.decoding = "async";
-          img.alt = "Garxvoid artwork";
+          img.loading="lazy";
 
-          wrap.appendChild(img);
-          gallery.appendChild(wrap);
+          w.appendChild(img);
+          gallery.appendChild(w);
         });
-        
-        // Initialize animations after gallery is built
-        initializeGallery();
-      },
-      error: function(error) {
-        gallery.innerHTML = '<div class="loading">Error loading gallery. Please check the CSV URL.</div>';
-        console.error('Parse error:', error);
+
+        initGallery();
       }
     });
-    
-  } catch (error) {
-    gallery.innerHTML = '<div class="loading">Error loading gallery. Please check the CSV URL.</div>';
-    console.error('Fetch error:', error);
-  }
-}
+  });
 
-/* ---------- INITIALIZE GALLERY ANIMATIONS ---------- */
-function initializeGallery() {
+/* ---------- ANIMATION ---------- */
+function initGallery(){
   const works = document.querySelectorAll(".work");
-  
-  // Fade in observer
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
+
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add("visible");
+        e.target.classList.remove("out");
+      }else{
+        e.target.classList.remove("visible");
+        e.target.classList.add("out");
       }
     });
-  }, {threshold:.15});
+  },{threshold:0.2});
 
-  works.forEach(w => observer.observe(w));
-  
-  // Scroll drift animation
-  function animate(){
-    works.forEach(work => {
-      const rect = work.getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const offset = (window.innerHeight / 2 - center) * 0.03;
-      work.querySelector("img").style.transform =
+  works.forEach(w=>io.observe(w));
+
+  /* PARALLAX */
+  function parallax(){
+    works.forEach(w=>{
+      const r = w.getBoundingClientRect();
+      const offset = (window.innerHeight - r.top) * 0.03;
+      w.querySelector("img").style.transform =
         `translateY(${offset}px)`;
     });
-    requestAnimationFrame(animate);
+    requestAnimationFrame(parallax);
   }
-  animate();
-  
-  // Lightbox functionality
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightbox-img");
+  parallax();
 
-  document.querySelectorAll(".work img").forEach(img => {
-    img.addEventListener("click", () => {
-      lightboxImg.src = img.src;
-      lightbox.classList.add("active");
-    });
+  /* LIGHTBOX */
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lightbox-img");
+
+  works.forEach(w=>{
+    w.onclick=()=>{
+      lbImg.src = w.querySelector("img").src;
+      lb.classList.add("active");
+    }
   });
 
-  lightbox.addEventListener("click", () => {
-    lightbox.classList.remove("active");
-    lightboxImg.src = "";
-  });
+  lb.onclick=()=>{
+    lb.classList.remove("active");
+    lbImg.src="";
+  }
 }
-
-// Load gallery on page load
-loadGallery();
 </script>
 
 </body>
